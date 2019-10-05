@@ -1,0 +1,7 @@
+# files and folders to black list
+/*
+
+# files and folders to white list
+!.gitignore
+!sofs19
+!README-sofs19.md
