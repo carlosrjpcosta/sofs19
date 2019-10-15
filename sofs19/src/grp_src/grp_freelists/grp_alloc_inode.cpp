@@ -26,9 +26,33 @@ namespace sofs19
     uint32_t grpAllocInode(uint32_t type, uint32_t perm)
     {
         soProbe(401, "%s(0x%x, 0%03o)\n", __FUNCTION__, type, perm);
-
-        /* change the following line by your code */
-        return binAllocInode(type, perm);
+        // Type does not represent a file, directory or a symbolic link
+        if(!(type == S_IFREG || type == S_IFDIR || type == S_IFLNK)){
+            throw SOException(EINVAL,__FUNCTION__);
+        }
+        // Permission out of range [0000-0777]
+        if(perm < 0000 || perm > 0777){
+            throw SOException(EINVAL,__FUNCTION__);
+        }
+        SOSuperBlock *sbp= soGetSuperBlockPointer();
+        // If there are no free inodes
+        if(sbp->ifree==0){
+            throw SOException(ENOSPC,__FUNCTION__);
+        }
+        sbp->ifree--; // Decrement the free inodes field
+        uint32_t in= sbp->ihead; // Get the next free inode
+        int ih= soOpenInode(in);
+        //soCheckInodeHandler(ih, __FUNCTION__);
+        SOInode *inode= soGetInodePointer(ih);
+        sbp->ihead= inode->next;
+        inode->mode= type | perm;
+        inode->atime= time(NULL);
+        inode->mtime= time(NULL);
+        inode->ctime= time(NULL);
+        soSaveInode(ih);
+        soCloseInode(ih);
+        soSaveSuperBlock();
+        return in;
     }
 };
 
