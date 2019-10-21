@@ -21,7 +21,6 @@ namespace sofs19
         
         uint32_t currentBlock = (itotal/IPB)+1;
         SODirEntry deblk[DPB];
-        //assert (sizeof(deblk) == BlockSize);
         deblk[0].in = 0;
         strcpy(deblk[0].name,".");
         deblk[1].in = 0;
