@@ -27,7 +27,7 @@ namespace sofs19
         deblk[0].in = currentBlock;
         strcpy(deblk[1].name,"..\n");
         deblk[1].in = currentBlock;
-        for(int i=2;i<sizeof(deblk);i++){
+        for(int i=2;i<DPB;i++){
             deblk[i].in = NullReference; //0xFFFFFFFF
             strcpy(deblk[i].name, "0\n");
         }
