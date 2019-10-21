@@ -22,19 +22,16 @@ namespace sofs19
         uint32_t currentBlock = (itotal/IPB)+1;
         SODirEntry deblk[DPB];
         //assert (sizeof(deblk) == BlockSize);
-        deblk[0].in = currentBlock;
-        strcpy(deblk[0].name,".\n");
-        deblk[0].in = currentBlock;
-        strcpy(deblk[1].name,"..\n");
-        deblk[1].in = currentBlock;
+        deblk[0].in = 0;
+        strcpy(deblk[0].name,".");
+        deblk[1].in = 0;
+        strcpy(deblk[1].name,"..");
         for(int i=2;i<DPB;i++){
             deblk[i].in = NullReference; //0xFFFFFFFF
-            strcpy(deblk[i].name, "0\n");
+            strcpy(deblk[i].name, "");
         }
-
+        
         soWriteRawBlock(currentBlock, &deblk);
-        /* change the following line by your code */
-        //return binFillRootDir(itotal);
     }
 };
 
