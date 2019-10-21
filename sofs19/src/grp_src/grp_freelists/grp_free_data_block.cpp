@@ -21,7 +21,12 @@ namespace sofs19
 {
     void grpFreeDataBlock(uint32_t bn)
     {
-        soProbe(442, "%s(%u)\n", __FUNCTION__, bn);
+        /*soProbe(442, "%s(%u)\n", __FUNCTION__, bn);
+        if bn == NullReference{
+            return;
+        }
+        datablock = soGetDataBlock(bn)
+        if*\
 
         /* change the following line by your code */
         binFreeDataBlock(bn);

@@ -18,9 +18,23 @@ namespace sofs19
     void grpFillRootDir(uint32_t itotal)
     {
         soProbe(606, "%s(%u)\n", __FUNCTION__, itotal);
+        
+        uint32_t currentBlock = (itotal/IPB)+1;
+        SODirEntry deblk[DPB];
+        //assert (sizeof(deblk) == BlockSize);
+        deblk[0].in = currentBlock;
+        strcpy(deblk[0].name,".\n");
+        deblk[0].in = currentBlock;
+        strcpy(deblk[1].name,"..\n");
+        deblk[1].in = currentBlock;
+        for(int i=2;i<sizeof(deblk);i++){
+            deblk[i].in = NullReference; //0xFFFFFFFF
+            strcpy(deblk[i].name, "0\n");
+        }
 
+        soWriteRawBlock(currentBlock, &deblk);
         /* change the following line by your code */
-        return binFillRootDir(itotal);
+        //return binFillRootDir(itotal);
     }
 };
 
