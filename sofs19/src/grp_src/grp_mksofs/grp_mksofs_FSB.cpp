@@ -13,10 +13,10 @@ namespace sofs19
     {
         soProbe(602, "%s(%s, %u, %u, %u)\n", __FUNCTION__, name, ntotal, itotal, nbref);
 
-        /* change the following line by your code 
-        binFillSuperBlock(name, ntotal, itotal, nbref); */
+        /* change the following line by your code */
+        binFillSuperBlock(name, ntotal, itotal, nbref); 
 
-
+        /*
         SOSuperBlock sb;
 
         sb.magic = MAGIC_NUMBER;
@@ -32,10 +32,15 @@ namespace sofs19
         sb.dz_free = ntotal-1; // number of free blocks in data zone
         sb.dz_start = 1; // physical number of the block where the data zone starts
         sb.dz_total = ntotal - nbref; // total number of data blocks
+        
+        // if se o dz_free for < 64 é tudo NULL
         sb.head_blk = ; // number of head reference data block
         sb.head_idx = ; // first occupied position in head reference data block
         sb.tail_blk ; // number of tail reference data block
         sb.tail_idx = ; // first empty position in tail reference data block
+        */
+
+        // fazer cache
     }
 };
 
