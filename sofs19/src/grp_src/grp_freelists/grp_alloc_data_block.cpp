@@ -23,8 +23,29 @@ namespace sofs19
     {
         soProbe(441, "%s()\n", __FUNCTION__);
 
+        SOSuperBlock *sb = soSBGetPointer();
+
+        if(sb -> brcache.idx == BLOCK_REFERENCE_CACHE_SIZE){
+            soReplenishBRCache();
+        }
+
+        if(sb -> brcache.idx == NullReference){
+            throw SOException(ENOSPC, __FUNCTION__);
+        }
+
+        uint32_t index = sb -> brcache.idx;
+        uint32_t ref = sb -> brcache.ref[index];
+        sb -> brcache.ref[index] = NullReference;
+
+        sb -> brcache.idx++;
+        sb -> dz_free--;
+
+        soSBSave();
+
+        return ref;
+
         /* change the following line by your code */
-        return binAllocDataBlock();
+        //return binAllocDataBlock();
     }
 };
 
