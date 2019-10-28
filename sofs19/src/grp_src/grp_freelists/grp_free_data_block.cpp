@@ -22,7 +22,7 @@ namespace sofs19
     void grpFreeDataBlock(uint32_t bn)
     {
         soProbe(442, "%s(%u)\n", __FUNCTION__, bn);
-        if bn == NullReference{
+        if (bn == NullReference){
             return;
         }
 

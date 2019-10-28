@@ -23,8 +23,42 @@ namespace sofs19
     {
         soProbe(402, "%s(%u)\n", __FUNCTION__, in);
 
+        
         /* change the following line by your code */
-        binFreeInode(in);
+        int inode_handler = soOpenInode(in);            // Open inode
+        SOInode *inode = soGetInodePointer(inode_handler);   // Get pointer to inode
+
+        inode->mode = 0;                // Free inode
+        inode->lnkcnt = 0;
+        inode->owner = 0;
+        inode->group = 0;
+        inode->size = 0;
+        inode->blkcnt = 0;
+        inode->atime = 0;
+        inode->mtime = 0;
+        inode->ctime = 0;
+        for(int i = 0; i < N_DIRECT; i++)
+        {
+            inode->d[i] = NullReference;
+        }
+        for(int i = 0; i < N_INDIRECT; i++)
+        {
+            inode->i1[i] = NullReference;
+        }
+        for(int i = 0; i < N_DOUBLE_INDIRECT; i++)
+        {
+            inode->i2[i] = NullReference;
+        }
+
+        soSaveInode(inode_handler);
+        soCloseInode(inode_handler);
+
+        SOSuperBlock *super_b = soGetSuperBlockPointer(); // Get pointer to SuperBlock
+
+        super_b->ifree++;                       // Increment list of Free Inodes
+
+        soSaveSuperBlock();                     // Save SuperBlock
+        // binFreeInode(in);
     }
 };
 
