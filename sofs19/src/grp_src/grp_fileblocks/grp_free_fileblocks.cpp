@@ -34,12 +34,13 @@ namespace sofs19
         soProbe(303, "%s(%d, %u)\n", __FUNCTION__, ih, ffbn);
 
         /* change the following line by your code */
+        
         binFreeFileBlocks(ih, ffbn);
     }
 
     /* ********************************************************* */
 
-#if false
+#if true
     static bool grpFreeIndirectFileBlocks(SOInode * ip, uint32_t i1, uint32_t ffbn)
     {
         soProbe(303, "%s(..., %u, %u)\n", __FUNCTION__, i1, ffbn);

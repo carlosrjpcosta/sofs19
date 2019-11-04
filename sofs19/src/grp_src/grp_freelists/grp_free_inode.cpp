@@ -28,7 +28,9 @@ namespace sofs19
         int inode_handler = soOpenInode(in);            // Open inode
         SOInode *inode = soGetInodePointer(inode_handler);   // Get pointer to inode
 
-        inode->mode = 0;                // Free inode
+        uint32_t next_inode = inode->next;
+        inode->next = NullReference;
+        inode->mode = INODE_FREE;                // Free inode
         inode->lnkcnt = 0;
         inode->owner = 0;
         inode->group = 0;
@@ -51,12 +53,12 @@ namespace sofs19
         }
 
         soSaveInode(inode_handler);
-        soCloseInode(inode_handler);
 
         SOSuperBlock *super_b = soGetSuperBlockPointer(); // Get pointer to SuperBlock
 
         super_b->ifree++;                       // Increment list of Free Inodes
-
+        super_b->tail_idx = in;
+        soCloseInode(inode_handler);
         soSaveSuperBlock();                     // Save SuperBlock
         // binFreeInode(in);
     }
