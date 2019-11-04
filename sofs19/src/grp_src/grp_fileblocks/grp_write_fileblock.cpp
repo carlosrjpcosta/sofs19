@@ -14,8 +14,16 @@ namespace sofs19
     {
         soProbe(332, "%s(%d, %u, %p)\n", __FUNCTION__, ih, fbn, buf);
 
-        /* change the following line by your code */
-        binWriteFileBlock(ih, fbn, buf);
+        //soCheckInodeHandler(ih, __FUNCTION__);
+        //No need to check Inode Handler (ih)
+        //It is assumed that ih is a valid handler of a inode
+        uint32_t dbn= soGetFileBlock(ih,fbn); //Gets the Data Block Number
+
+        if (dbn==NullReference){ 
+            dbn = soAllocFileBlock(ih,fbn);
+        }
+
+        soWriteDataBlock(dbn,buf);
     }
 };
 
