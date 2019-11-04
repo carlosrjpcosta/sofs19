@@ -22,12 +22,19 @@ namespace sofs19
     void grpFreeDataBlock(uint32_t bn)
     {
         soProbe(442, "%s(%u)\n", __FUNCTION__, bn);
-        if bn == NullReference{
-            return;
+        SOSuperBlock* sb = soGetSuperBlockPointer();
+        if (sb -> tail_cache.idx == TAIL_CACHE_SIZE){
+            soDepleteTailCache();
         }
+        sb -> tail_cache.ref[sb -> tail_cache.idx] = bn;
+        sb -> tail_cache.idx++;
+        sb -> dz_free++;
+        soSaveSuperBlock();
+
+
 
         /* change the following line by your code */
-        binFreeDataBlock(bn);
+        //binFreeDataBlock(bn);
     }
 };
 
