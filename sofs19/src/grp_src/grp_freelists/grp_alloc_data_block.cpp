@@ -31,7 +31,7 @@ namespace sofs19
 
         uint32_t index = sb -> head_cache.idx;
 
-        if(index == HEAD_CACHE_SIZE - 1){
+        if(index == HEAD_CACHE_SIZE){
             soReplenishHeadCache();
         }
 
