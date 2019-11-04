@@ -25,7 +25,7 @@ namespace sofs19
 
         uint32_t total_blocks = itotal/IPB;     // Numero total de blocos: Número total de inodes / Inodes Per Block
             
-        for(int i = 0; i < total_blocks + 1 ;i++){  // Percorrer os blocos da tabela de inode
+        for(int i = 1; i < total_blocks + 1 ;i++){  // Percorrer os blocos da tabela de inode   * Verificar <= 
 
 
             if(i == 0)              // inode 0 é guardado no bloco 0
