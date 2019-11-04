@@ -24,14 +24,15 @@ namespace sofs19
         SOInode inodetable[IPB];    // Tabela de inodes. IPB = Inode Per Block
 
         uint32_t total_blocks = itotal/IPB;     // Numero total de blocos: Número total de inodes / Inodes Per Block
+        int index = 0;
             
-        for(int i = 1; i < total_blocks + 1 ;i++){  // Percorrer os blocos da tabela de inode   * Verificar <= 
+        for(int i = 1; i <= total_blocks + 1 ;i++){  // Percorrer os blocos da tabela de inode   * Verificar <= 
 
 
-            if(i == 0)              // inode 0 é guardado no bloco 0
-            {
+            if(i == 1)              // inode 0 é guardado no bloco 0
+            {   
+                index++;
                 SOInode inode;              // Criar inode
-
                 inode.mode = S_IFDIR | 00775;
                 inode.lnkcnt = 2;
                 inode.owner = getuid();
@@ -75,8 +76,8 @@ namespace sofs19
 
                 for(uint32_t k = 1; k < IPB; k++)
                 {
+                    index++;
                     SOInode inode;
-
                     inode.mode = INODE_FREE;
                     inode.lnkcnt = 0;
                     inode.owner = 0;
@@ -86,14 +87,8 @@ namespace sofs19
                     inode.atime = 0;
                     inode.mtime = 0;
                     inode.ctime = 0;
-                    if(k == IPB-1)
-                    {
-                        inode.next = NullReference;
-                    }
-                    else
-                    {
-                        inode.next = k+1;
-                    }
+                    inode.next = index;
+                    
                     for(int j = 0; j < N_DIRECT; j++)
                     {
                         inode.d[j] = NullReference;
@@ -112,8 +107,9 @@ namespace sofs19
             }
             else                // inode table começa no bloco 1
             {
-                for(uint32_t k = 1; k < IPB; k++)
+                for(uint32_t k = 0; k < IPB; k++)
                 {
+                    index++;
                     SOInode inode;
 
                     inode.mode = INODE_FREE;
@@ -125,13 +121,13 @@ namespace sofs19
                     inode.atime = 0;
                     inode.mtime = 0;
                     inode.ctime = 0;
-                    if(k == IPB-1)
+                    if(k == IPB-1 && i == total_blocks)
                     {
                         inode.next = NullReference;
                     }
                     else
                     {
-                        inode.next = k+1;
+                        inode.next = index;
                     }
                     for(int j = 0; j < N_DIRECT; j++)
                     {
