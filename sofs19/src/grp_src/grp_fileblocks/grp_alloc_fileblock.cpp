@@ -22,7 +22,11 @@ namespace sofs19
     uint32_t grpAllocFileBlock(int ih, uint32_t fbn)
     {
         soProbe(302, "%s(%d, %u)\n", __FUNCTION__, ih, fbn);
-
+        /*
+        ver zona de alocaçao (direto,indireto,blabla)
+        block count++
+        return numero do block alocado
+        */
         /* change the following two lines by your code */
         return binAllocFileBlock(ih, fbn);
     }
