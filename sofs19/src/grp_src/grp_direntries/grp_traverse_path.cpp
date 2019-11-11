@@ -14,17 +14,13 @@
 #include <sys/stat.h>
 
 
-bool checkDir(uint32_t inode){
-    uint32_t ih = soOpenInode(inode);
-    SOInode* ip = soGetInodePointer(ih);
+bool checkDir(SOInode ip){
     if((ip->mode & S_IFDIR) != S_IFDIR){
         return false;
     }
     return true;
 }
-bool checkTraverse(uint32_t inode, uint32_t u, uint32_t g){
-    uint32_t ih = soOpenInode(inode);
-    SOInode* ip = soGetInodePointer(ih);
+bool checkTraverse(SOInode ip, uint32_t u, uint32_t g){
     if ((ip->user == u) && ((ip->mode & 0100) != 0100)){
         return false;
     }
