@@ -16,7 +16,23 @@ namespace sofs19
         soProbe(204, "%s(%d, %s, %s)\n", __FUNCTION__, pih, name, newName);
 
         /* change the following line by your code */
-        binRenameDirEntry(pih, name, newName);
+        //binRenameDirEntry(pih, name, newName);
+
+        SOInode *inode = soGetInodePointer(pih);
+        SODirEntry dir[DPB];
+        for(uint32_t i = 0; i < inode -> blkcnt; i++){
+            sofs19::soReadFileBlock(pih, i, dir);
+            for(uint32_t j = 0; j < DPB; j++){
+                if(strcmp(dir[j].name, name) == 0){
+                    strcpy(dir[j].name, newName);
+                    sofs19::soWriteFileBlock(pih, i, dir);
+                    break;
+                }
+                else{
+                    throw SOException(ENOENT, __FUNCTION__);
+                }
+            }
+        }
     }
 };
 
