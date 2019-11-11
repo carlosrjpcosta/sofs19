@@ -20,16 +20,16 @@ namespace sofs19
         soProbe(221, "%s(%s)\n", __FUNCTION__, path);
         uint32_t u = getuid();
         uint32_t g = getgid();
-        char* dirs = strdupa(path);
-        char* bases = strdupa(path);
+        char *dirs = strdupa(path);
+        char *bases = strdupa(path);
         char *dname = dirname(dirs);
         char *bname = basename(bases);
         uint32_t bnode;
-        if (strcpm(dname,"/") == 0) {
+        if (strcmp(dname,"/") == 0) {
             return soGetDirEntry(soOpenInode(0),bname);
         }
         bnode = grpTraversePath(dname);
-        if (strcpm(dname,".") == 0) {
+        if (strcmp(dname,".") == 0) {
             throw SOException(EINVAL, __FUNCTION__);
         }
         if (checkDir(bnode) == false){
