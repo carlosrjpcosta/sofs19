@@ -20,18 +20,20 @@ namespace sofs19
 
         SOInode *inode = soGetInodePointer(pih);
         SODirEntry dir[DPB];
+        bool exists = false;
         for(uint32_t i = 0; i < inode -> blkcnt; i++){
             sofs19::soReadFileBlock(pih, i, dir);
             for(uint32_t j = 0; j < DPB; j++){
                 if(strcmp(dir[j].name, name) == 0){
+                    exists = true;
                     strcpy(dir[j].name, newName);
                     sofs19::soWriteFileBlock(pih, i, dir);
                     break;
                 }
-                else{
-                    throw SOException(ENOENT, __FUNCTION__);
-                }
             }
+        }
+        if(!exists){
+            throw SOException(ENOENT, __FUNCTION__);
         }
     }
 };
