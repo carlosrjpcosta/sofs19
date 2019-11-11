@@ -46,6 +46,8 @@ namespace sofs19
         SOInode *inode= soGetInodePointer(ih);
         sbp->ihead= inode->next;
         inode->mode= type | perm;
+        inode->owner= getuid();
+        inode->group= getgid();
         inode->atime= time(NULL);
         inode->mtime= time(NULL);
         inode->ctime= time(NULL);
