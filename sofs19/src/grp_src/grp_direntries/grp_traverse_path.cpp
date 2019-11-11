@@ -13,6 +13,31 @@
 #include <unistd.h>
 #include <sys/stat.h>
 
+
+bool checkDir(uint32_t inode){
+    uint32_t ih = soOpenInode(inode);
+    SOInode* ip = soGetInodePointer(ih);
+    if((ip->mode & S_IFDIR) != S_IFDIR){
+        return false;
+    }
+    return true;
+}
+bool checkTraverse(uint32_t inode, uint32_t u, uint32_t g){
+    uint32_t ih = soOpenInode(inode);
+    SOInode* ip = soGetInodePointer(ih);
+    if ((ip->user == u) && ((ip->mode & 0100) != 0100)){
+        return false;
+    }
+    if ((ip->group == g) && ((ip->mode & 0010) != 0010)){
+        return false;
+    }
+    if ((ip->group != g) && (ip->user != u) && ((ip->mode & 0001) != 0001)){
+        return false
+    }
+    return true;
+}
+
+
 namespace sofs19
 {
     uint32_t grpTraversePath(char *path)
@@ -42,29 +67,6 @@ namespace sofs19
 
         /* change the following line by your code */
         //return binTraversePath(path);
-    }
-
-    bool checkDir(uint32_t inode){
-        uint32_t ih = soOpenInode(inode);
-        SOInode* ip = soGetInodePointer(ih);
-        if((ip->mode & S_IFDIR) != S_IFDIR){
-            return false;
-        }
-        return true;
-    }
-    bool checkTraverse(uint32_t inode, uint32_t u, uint32_t g){
-        uint32_t ih = soOpenInode(inode);
-        SOInode* ip = soGetInodePointer(ih);
-        if ((ip->user == u) && ((ip->mode & 0100) != 0100)){
-            return false;
-        }
-        if ((ip->group == g) && ((ip->mode & 0010) != 0010)){
-            return false;
-        }
-        if ((ip->group != g) && (ip->user != u) && ((ip->mode & 0001) != 0001)){
-            return false
-        }
-        return true;
     }
 };
 
