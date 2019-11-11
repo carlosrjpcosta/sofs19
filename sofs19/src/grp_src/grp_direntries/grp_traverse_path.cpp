@@ -20,8 +20,8 @@ namespace sofs19
         soProbe(221, "%s(%s)\n", __FUNCTION__, path);
         uint32_t u = getuid();
         uint32_t g = getgid();
-        char dirs = strdupa(path);
-        char bases = strdupa(path);
+        char* dirs = strdupa(path);
+        char* bases = strdupa(path);
         char *dname = dirname(dirs);
         char *bname = basename(bases);
         uint32_t bnode;
@@ -55,13 +55,13 @@ namespace sofs19
     bool checkTraverse(uint32_t inode, uint32_t u, uint32_t g){
         uint32_t ih = soOpenInode(inode);
         SOInode* ip = soGetInodePointer(ih);
-        if ((ip->user == u) & (ip->mode & 0100 != 0100)){
+        if ((ip->user == u) && ((ip->mode & 0100) != 0100)){
             return false;
         }
-        if ((ip->group == g) & (ip->mode & 0010 != 0010)){
+        if ((ip->group == g) && ((ip->mode & 0010) != 0010)){
             return false;
         }
-        if ((ip->group != g) & (ip->user != u) & (ip->mode & 0001 != 0001)){
+        if ((ip->group != g) && (ip->user != u) && ((ip->mode & 0001) != 0001)){
             return false
         }
         return true;
