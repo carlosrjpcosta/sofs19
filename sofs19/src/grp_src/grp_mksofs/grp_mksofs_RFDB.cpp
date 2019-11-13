@@ -14,10 +14,10 @@ namespace sofs19
         soProbe(607, "%s(%u, %u, %u)\n", __FUNCTION__, ntotal, itotal, nbref);
 
         /* change the following line by your code */
-        //binResetFreeDataBlocks(ntotal, itotal, nbref);
-        uint32_t array [BlockSize];
+        binResetFreeDataBlocks(ntotal, itotal, nbref);
+        uint8_t array [BlockSize];
         memset(array, 0, BlockSize);
-        uint32_t freeblocks = ntotal - IPB - nbref - 2; //O número de blocos livres são o número total de blocos menos os blocos ocupados (o superblock, os da tabela de inodes, os de referência (se existirem) e a raiz)
+        uint32_t freeblocks = (itotal/IPB) + nbref + 2;
         for(uint32_t i = freeblocks; i < ntotal; i++){
             soWriteRawBlock(i, &array);
         }

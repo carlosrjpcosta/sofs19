@@ -55,7 +55,7 @@ namespace sofs19
         uint32_t blk[RPB];
         afbn = afbn - N_DIRECT;
 
-        if(ip -> i1[afbn] == (uint32_t)NullReference){
+        if(ip -> i1[afbn/RPB] == (uint32_t)NullReference){
             res = NullReference;
             return res;
         }
@@ -83,13 +83,13 @@ namespace sofs19
         uint32_t blk[RPB];
         afbn = afbn - N_DIRECT - (N_INDIRECT * RPB);
 
-        if(ip -> i2[afbn] == (uint32_t)NullReference){
+        if(ip -> i2[afbn/(RPB*RPB)] == (uint32_t)NullReference){
             res = NullReference;
             return res;
         }
         else{
-            soReadDataBlock((ip -> i2[afbn/RPB]), blk);
-            temp = blk[afbn];
+            soReadDataBlock((ip -> i2[afbn/(RPB*RPB)]), blk);
+            temp = blk[afbn/(RPB - ((afbn / (RPB * RPB)) * RPB))];
             soReadDataBlock(temp, blk);
             ref = (uint32_t *) blk;
             res = ref[afbn%RPB];

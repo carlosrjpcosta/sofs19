@@ -21,7 +21,7 @@ namespace sofs19
         SOInode *inode = soGetInodePointer(pih);
         SODirEntry dir[DPB];
         bool exists = false;
-        for(uint32_t i = 0; i < inode -> blkcnt; i++){
+        for(uint32_t i = 0; i < inode -> size / BlockSize; i++){
             soReadFileBlock(pih, i, dir);
             for(uint32_t j = 0; j < DPB; j++){
                 if(strcmp(dir[j].name, name) == 0){
