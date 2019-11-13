@@ -9,10 +9,10 @@
 namespace sofs19
 {
     /* ********************************************************* */
-
+#if true
     static uint32_t grpGetIndirectFileBlock(SOInode * ip, uint32_t fbn);
     static uint32_t grpGetDoubleIndirectFileBlock(SOInode * ip, uint32_t fbn);
-
+#endif
     /* ********************************************************* */
 
     uint32_t grpGetFileBlock(int ih, uint32_t fbn)
@@ -42,7 +42,7 @@ namespace sofs19
     }
 
     /* ********************************************************* */
-
+#if true
     static uint32_t grpGetIndirectFileBlock(SOInode * ip, uint32_t afbn)
     {
         soProbe(301, "%s(%d, ...)\n", __FUNCTION__, afbn);
@@ -67,8 +67,9 @@ namespace sofs19
         }
     }
 
+#endif
     /* ********************************************************* */
-
+#if true
     static uint32_t grpGetDoubleIndirectFileBlock(SOInode * ip, uint32_t afbn)
     {
         soProbe(301, "%s(%d, ...)\n", __FUNCTION__, afbn);
@@ -95,5 +96,7 @@ namespace sofs19
             return res;
         }
     }
+
+#endif
 };
 
