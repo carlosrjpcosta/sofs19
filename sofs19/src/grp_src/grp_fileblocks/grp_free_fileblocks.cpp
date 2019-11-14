@@ -11,7 +11,7 @@
 
 namespace sofs19
 {
-#if false
+#if true
     /* free all blocks between positions ffbn and RPB - 1
      * existing in the block of references given by i1.
      * Return true if, after the operation, all references become NullReference.
@@ -34,8 +34,21 @@ namespace sofs19
         soProbe(303, "%s(%d, %u)\n", __FUNCTION__, ih, ffbn);
 
         /* change the following line by your code */
+        SOInode* inode = soGetInodePointer(ih);
+
+        if (7 > ffbn)
+        {
+            for(int i = ffbn; i < 7;i++)
+            {
+                inode->d[i] = NullReference;
+            }
+        }
+
+        uint32_t i2 = 8 * 256 + 8;
+        bool free_in = grpFreeIndirectFileBlocks(inode,8,ffbn);
+        bool free_in2 = grpFreeDoubleIndirectFileBlocks(inode,i2,ffbn);
         
-        binFreeFileBlocks(ih, ffbn);
+        // binFreeFileBlocks(ih, ffbn);
     }
 
     /* ********************************************************* */
@@ -46,13 +59,20 @@ namespace sofs19
         soProbe(303, "%s(..., %u, %u)\n", __FUNCTION__, i1, ffbn);
 
         /* change the following line by your code */
+        uint32_t i2 = 8 * 256 + 8;
+
+        if (i2 - 1 > ffbn)
+        {
+            return true;
+        }
+        return false;
         throw SOException(ENOSYS, __FUNCTION__); 
     }
 #endif
 
     /* ********************************************************* */
 
-#if false
+#if true
     static bool grpFreeDoubleIndirectFileBlocks(SOInode * ip, uint32_t i2, uint32_t ffbn)
     {
         soProbe(303, "%s(..., %u, %u)\n", __FUNCTION__, i2, ffbn);
