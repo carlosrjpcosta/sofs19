@@ -23,6 +23,7 @@ namespace sofs19
         if((ip->mode & S_IFDIR) != S_IFDIR){
             return false;
         }
+        soCloseInode(ih);
         return true;
     }
     bool checkTraverse(uint32_t inode, uint32_t u, uint32_t g){
@@ -37,6 +38,7 @@ namespace sofs19
         if ((ip->group != g) && (ip->owner != u) && ((ip->mode & 0001) != 0001)){
             return false;
         }
+        soCloseInode(ih);
         return true;
     }
 
@@ -44,27 +46,26 @@ namespace sofs19
     uint32_t grpTraversePath(char *path)
     {
         soProbe(221, "%s(%s)\n", __FUNCTION__, path);
-        uint32_t u = getuid();
-        uint32_t g = getgid();
-        char *dirs = strdupa(path);
-        char *bases = strdupa(path);
-        char *dname = dirname(dirs);
-        char *bname = basename(bases);
+        //uint32_t u = getuid();
+        //uint32_t g = getgid();
+        if (strcmp(path,"/") == 0) {
+            return 0;
+        }
+        char* dname = dirname(strdupa(path));
+        char* bname = basename(strdupa(path));
         uint32_t bnode;
-        if (strcmp(dname,"/") == 0) {
-            return soGetDirEntry(soOpenInode(0),bname);
-        }
+        
         bnode = grpTraversePath(dname);
-        if (strcmp(dname,".") == 0) {
-            throw SOException(EINVAL, __FUNCTION__);
-        }
-        if (checkDir(bnode) == false){
+        /*if (checkDir(bnode) == false){
             throw SOException(ENOTDIR, __FUNCTION__);
         }
         if (checkTraverse(bnode, u, g) == false){
             throw SOException(EACCES, __FUNCTION__);
-        }
-        return soGetDirEntry(soOpenInode(bnode),bname);
+        }*/
+        uint32_t ih = soOpenInode(bnode);
+        uint32_t in = soGetDirEntry(ih,bname);
+        soCloseInode(ih);
+        return in;
 
         /* change the following line by your code */
         //return binTraversePath(path);
