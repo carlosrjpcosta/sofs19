@@ -25,7 +25,6 @@ namespace sofs19
         uint32_t block_number = 0;
         uint32_t temp;
 
-        bool empty = 1;
         bool point = 0;
         bool pointpoint = 0;
 
