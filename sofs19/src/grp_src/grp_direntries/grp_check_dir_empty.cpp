@@ -25,6 +25,10 @@ namespace sofs19
         uint32_t block_number = 0;
         uint32_t temp;
 
+        bool empty = 1;
+        bool point = 0;
+        bool pointpoint = 0;
+
         uint32_t fileblocks = inode->size/BlockSize;
         for(uint32_t i = 0; i < fileblocks; i++){
             temp = soGetFileBlock(ih, block_number);
@@ -33,15 +37,28 @@ namespace sofs19
                 soReadFileBlock(ih, block_number, dir);
 
                 for(uint32_t j = 2; j < DPB; i++){
-                    if(strcmp(dir[i].name, "\0") != 0){
-                        return false;
+                    if(dir[i].name[0] != '\0'){
+                        if(strcmp(dir[i].name, ".")){
+                            if(point){ return false; }
+                            point = 1;
+                        }
+                        else if (strcmp(dir[i].name, "..")){
+                            if(pointpoint){ return false; }
+                            pointpoint = 1;
+                        }
+                        else{
+                            return false;
+                        }
                     }
                 }
                 block_counter++;
             }
             block_number++;
         }
-        return true;
+
+
+        if(point && pointpoint){ return true; }
+        return false;
     }
 };
 
