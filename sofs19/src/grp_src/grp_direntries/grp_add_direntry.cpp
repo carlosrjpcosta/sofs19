@@ -68,7 +68,9 @@ namespace sofs19
             soWriteDataBlock(blck_number, &dir);
             parent->size = parent->size + sizeof(SODirEntry);    
         }
-        
+
+        soSaveInode(pih);
+        soCloseInode(pih);
     }
 };
 
