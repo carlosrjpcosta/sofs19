@@ -33,22 +33,22 @@ namespace sofs19
     {
         soProbe(303, "%s(%d, %u)\n", __FUNCTION__, ih, ffbn);
 
-        /* change the following line by your code */
-        SOInode* inode = soGetInodePointer(ih);
+        // /* change the following line by your code */
+        // SOInode* inode = soGetInodePointer(ih);
 
-        if (7 > ffbn)
-        {
-            for(int i = ffbn; i < 7;i++)
-            {
-                inode->d[i] = NullReference;
-            }
-        }
+        // if (ffbn < N_DIRECT)
+        // {
+        //     for(int i = ffbn; i < N_DIRECT;i++)
+        //     {
+        //         soWriteDataBlock(ih,i,NullReference);
+        //     }
+        // }
 
-        uint32_t i2 = 8 * 256 + 8;
-        bool free_in = grpFreeIndirectFileBlocks(inode,8,ffbn);
-        bool free_in2 = grpFreeDoubleIndirectFileBlocks(inode,i2,ffbn);
+        // uint32_t i2 = N_INDIRECT * RPB + N_DIRECT;
+        // bool free_in = grpFreeIndirectFileBlocks(inode,N_DIRECT,ffbn);
+        // bool free_in2 = grpFreeDoubleIndirectFileBlocks(inode,i2,ffbn);
         
-        // binFreeFileBlocks(ih, ffbn);
+        binFreeFileBlocks(ih, ffbn);
     }
 
     /* ********************************************************* */
@@ -58,15 +58,14 @@ namespace sofs19
     {
         soProbe(303, "%s(..., %u, %u)\n", __FUNCTION__, i1, ffbn);
 
-        /* change the following line by your code */
-        uint32_t i2 = 8 * 256 + 8;
+        // /* change the following line by your code */
 
-        if (i2 - 1 > ffbn)
-        {
-            return true;
-        }
-        return false;
-        throw SOException(ENOSYS, __FUNCTION__); 
+        // if (i2 - 1 > ffbn)
+        // {
+        //     return true;
+        // }
+        // return false;
+        // throw SOException(ENOSYS, __FUNCTION__); 
     }
 #endif
 
@@ -78,7 +77,7 @@ namespace sofs19
         soProbe(303, "%s(..., %u, %u)\n", __FUNCTION__, i2, ffbn);
 
         /* change the following line by your code */
-        throw SOException(ENOSYS, __FUNCTION__); 
+        // throw SOException(ENOSYS, __FUNCTION__); 
     }
 #endif
 

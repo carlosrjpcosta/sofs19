@@ -38,14 +38,7 @@ namespace sofs19
             blck_number = soAllocFileBlock(pih,block);
             
             dir[0].in = cin;
-            if(strlen(name) < SOFS19_MAX_NAME)
-            {
-                strcpy(dir[0].name,name);
-            }
-            else
-            {
-                printf("\n Nome demasiado grande. \n");
-            }
+            strcpy(dir[0].name,name);
             
             soWriteDataBlock(blck_number, &dir);
             parent->size = parent->size + sizeof(SODirEntry);
@@ -59,7 +52,7 @@ namespace sofs19
 
         else
         {
-            soReadFileBlock(pih, block, &dir);
+            soReadFileBlock(pih, blck_number, &dir);
 
             __uint32_t blck_index = (parent->size/sizeof(SODirEntry)) % RPB;
             strcpy(dir[blck_index].name,name);
