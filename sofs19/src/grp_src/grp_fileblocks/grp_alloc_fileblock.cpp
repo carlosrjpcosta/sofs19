@@ -120,7 +120,7 @@ namespace sofs19
             soReadDataBlock(ip->i2[diindex], &db);
             //create indirect
             uint32_t ref = (afbn/RPB)%RPB;
-            soWriteDataBlock(blk,db2);
+            soWriteDataBlock(blk,db);
             blk = soAllocDataBlock();
             db2[ref] = blk;
             ip->blkcnt += 2;
