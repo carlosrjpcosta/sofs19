@@ -14,55 +14,63 @@
 #include <sys/stat.h>
 
 
-
 namespace sofs19
 {
-    bool checkTraverse(SOInode ip, uint32_t u, uint32_t g){
-        if ((ip->owner == u) && ((ip->mode & 0100) != 0100)){
-            return false;
-        }
-        if ((ip->group == g) && ((ip->mode & 0010) != 0010)){
-            return false;
-        }
-        if ((ip->group != g) && (ip->owner != u) && ((ip->mode & 0001) != 0001)){
-            return false;
-        }
-        return true;
-    }
-
-
-    uint32_t grpTraversePath(char *path)
-    {
+        /* ********************************************************* */
+#if true
+    static uint32_t recTraversePath(char *path);
+#endif
+    /* ********************************************************* */
+    
+    uint32_t grpTraversePath(char *path) {
         soProbe(221, "%s(%s)\n", __FUNCTION__, path);
-        uint32_t u = getuid();
-        uint32_t g = getgid();
-        if (strcmp(&path,"/") == 0){
+        if (strcmp(strndupa(path,1),"/")){
             throw SOException(EINVAL, __FUNCTION__);
         }
-        if (strcmp(path,"/") == 0) {
-            return 0;
-        }
+
+        return recTraversePath (path);        
+        /* change the following line by your code */
+        //return binTraversePath(path);
+    }
+
+#if true
+    static uint32_t recTraversePath(char *path){
+        
         char* dname = dirname(strdupa(path));
         char* bname = basename(strdupa(path));
-        
-        uint32_t bnode = grpTraversePath(dname);
-        
-        uint32_t ih = soOpenInode(bnode);
+        if (!strcmp(dname,"/")){
+            if (!strcmp(dname,bname)){
+                return 0;
+            }
+            int ih = soOpenInode(0);
+            SOInode* ip = soGetInodePointer(ih);
+            //if the process that calls the operation does not have traverse (x) permission on all the components of the path, 
+            //with exception of the rightmost one, error EACCES is thrown; 
+            if (!((ip->owner == getuid() || ip->group == getgid()) && soCheckInodeAccess(ih,X_OK))){
+                throw SOException(EACCES, __FUNCTION__);
+            }
+            uint32_t in = soGetDirEntry(ih,bname);
+            soCloseInode(ih);
+            return in;
+        }
+        int ih = soOpenInode(recTraversePath(dname));
         SOInode* ip = soGetInodePointer(ih);
 
-        if((ip->mode & S_IFDIR) != S_IFDIR){
+        //if one of the path components, with the exception of the rightmost one, 
+        //is not a directory, error ENODIR is thrown
+        if(!S_ISDIR(ip->mode)){
             throw SOException(ENOTDIR, __FUNCTION__);
         }
-        if (checkTraverse(bnode, u, g) == false){
+        //if the process that calls the operation does not have traverse (x) permission on all the components of the path, 
+        //with exception of the rightmost one, error EACCES is thrown; 
+        if (!((ip->owner == getuid() || ip->group == getgid()) && soCheckInodeAccess(ih,X_OK))){
             throw SOException(EACCES, __FUNCTION__);
         }
 
         uint32_t in = soGetDirEntry(ih,bname);
         soCloseInode(ih);
         return in;
-
-        /* change the following line by your code */
-        //return binTraversePath(path);
     }
+#endif    
 };
 
