@@ -21,6 +21,7 @@ namespace sofs19
 
         sb.magic = MAGIC_NUMBER;
         sb.version = VERSION_NUMBER;
+        strncpy(sb.name,name,PARTITION_NAME_SIZE);
         sb.mntstat = 0;                         // mount status (1: properly unmounted; 0: otherwise)
         sb.mntcnt = 0;                          // number of mounts since last file system check
         sb.ntotal = ntotal;                     // total number of blocks in the device
@@ -76,6 +77,8 @@ namespace sofs19
         for(unsigned int i = 0; i < TAIL_CACHE_SIZE; i++){
             sb.tail_cache.ref[i] = NullReference;
         }
+
+        soWriteRawBlock(0,&sb);
     }
 };
 
