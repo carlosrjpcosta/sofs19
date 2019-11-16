@@ -28,7 +28,7 @@ namespace sofs19
             throw SOException(EINVAL, __FUNCTION__);
         }
 
-        return recTraversePath (path);        
+        return recTraversePath (strdupa(path));        
         /* change the following line by your code */
         //return binTraversePath(path);
     }
