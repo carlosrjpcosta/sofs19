@@ -29,15 +29,13 @@ namespace sofs19
             throw SOException(ENOSPC, __FUNCTION__);
         }
 
-        uint32_t index = sb -> head_cache.idx;
-
-        if(index == HEAD_CACHE_SIZE){
+        if(sb->head_cache.idx == HEAD_CACHE_SIZE){
             soReplenishHeadCache();
         }
 
 
-        uint32_t ref = sb -> head_cache.ref[index];
-        sb -> head_cache.ref[index] = NullReference;
+        uint32_t ref = sb -> head_cache.ref[sb->head_cache.idx];
+        sb -> head_cache.ref[sb->head_cache.idx] = NullReference;
 
         sb -> head_cache.idx++;
         sb -> dz_free--;
