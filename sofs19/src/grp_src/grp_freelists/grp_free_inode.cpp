@@ -41,15 +41,15 @@ namespace sofs19
         inode->ctime = 0;
         inode->next = NullReference;
 
-        for(int i = 0; i < N_DIRECT; i++)
+        for(uint32_t i = 0; i < N_DIRECT; i++)
         {
             inode->d[i] = NullReference;
         }
-        for(int i = 0; i < N_INDIRECT; i++)
+        for(uint32_t i = 0; i < N_INDIRECT; i++)
         {
             inode->i1[i] = NullReference;
         }
-        for(int i = 0; i < N_DOUBLE_INDIRECT; i++)
+        for(uint32_t i = 0; i < N_DOUBLE_INDIRECT; i++)
         {
             inode->i2[i] = NullReference;
         }
@@ -57,16 +57,18 @@ namespace sofs19
         soSaveInode(inode_handler);
         soCloseInode(inode_handler);
 
-        int inode_handler_tail = soOpenInode(super_b->tail_idx);// Open inode
-        SOInode *inode_tail = soGetInodePointer(inode_handler_tail);
-        inode_tail->next = inode_tail->next++;
-        soSaveInode(inode_handler_tail);
-        soCloseInode(inode_handler_tail);
-
+        if (super_b ->ifree==0){
+            super_b->ihead= in;
+        } else {
+            int inode_handler_tail = soOpenInode(super_b->itail);// Open inode
+            SOInode *inode_tail = soGetInodePointer(inode_handler_tail);
+            inode_tail->next = in;
+            soSaveInode(inode_handler_tail);
+            soCloseInode(inode_handler_tail);
+        }
         super_b->ifree++;                       // Increment list of Free Inodes
-        super_b->tail_idx = in;
+        super_b->itail = in;
         soSaveSuperBlock();                     // Save SuperBlock
-    
     }
 };
 

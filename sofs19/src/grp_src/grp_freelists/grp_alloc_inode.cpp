@@ -51,6 +51,9 @@ namespace sofs19
         inode->atime= time(NULL);
         inode->mtime= time(NULL);
         inode->ctime= time(NULL);
+        if (sbp->ifree==0){
+            sbp->itail= NullReference;
+        }
         soSaveInode(ih);
         soCloseInode(ih);
         soSaveSuperBlock();
