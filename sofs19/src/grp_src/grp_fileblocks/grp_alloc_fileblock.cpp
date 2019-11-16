@@ -22,6 +22,7 @@ namespace sofs19
     uint32_t grpAllocFileBlock(int ih, uint32_t fbn)
     {
         soProbe(302, "%s(%d, %u)\n", __FUNCTION__, ih, fbn);
+        
         SOInode* ip = soGetInodePointer(ih);
         uint32_t BRB = RPB * RPB;
         uint32_t doubleIndirectStart = N_INDIRECT * RPB + N_DIRECT;
@@ -38,11 +39,11 @@ namespace sofs19
             ip->blkcnt++;
         }
 
-        if (fbn >= N_DIRECT && fbn < doubleIndirectStart) {
+        else if (fbn >= N_DIRECT && fbn < doubleIndirectStart) {
             blk = grpAllocIndirectFileBlock(ip, fbn - N_DIRECT);
         }
 
-        if (fbn >= doubleIndirectStart) {
+        else {
             blk = grpAllocDoubleIndirectFileBlock(ip, fbn - doubleIndirectStart);
         }
 
@@ -57,31 +58,32 @@ namespace sofs19
     static uint32_t grpAllocIndirectFileBlock(SOInode * ip, uint32_t afbn)
     {
         soProbe(302, "%s(%d, ...)\n", __FUNCTION__, afbn);
-        uint32_t iindex = (afbn/RPB) % RPB;
+        uint32_t i1idx = afbn/RPB;
         uint32_t ref = afbn % RPB;
-        uint32_t db[RPB];
+        uint32_t buf[RPB];
         uint32_t blk;
 
-        if (ip->i1[iindex] == NullReference) {
+        for (uint32_t i = 0; i < RPB; i++) {
+            buf[i] = NullReference;
+        }
+        
+        if (ip->i1[i1idx] == NullReference) {
+        
+            ip->i1[i1idx] = soAllocDataBlock();
+
             blk = soAllocDataBlock();
-            for (uint32_t i = 0; i < RPB; i++) {
-                db[i] = NullReference;
-            }
-            soWriteDataBlock(blk,db);
-            ip->i1[iindex] = blk;
-            soReadDataBlock(ip->i1[iindex], &db);
-            blk = soAllocDataBlock();
-            db[ref] = blk;
+            buf[ref] = blk;
+            soWriteDataBlock(ip->i1[i1idx], buf);
             ip->blkcnt += 2;
         }
         else {
-            soReadDataBlock(ip->i1[iindex], &db);
             blk = soAllocDataBlock();
-            ip->i1[iindex] = blk;
+            soReadDataBlock(ip->i1[i1idx], buf);
+            buf[ref]= blk;
+            soWriteDataBlock(ip->i1[i1idx], buf);
             ip->blkcnt++;
         }
         return blk;
-        /* change the following two lines by your code */
     }
 #endif
 
@@ -91,42 +93,51 @@ namespace sofs19
     static uint32_t grpAllocDoubleIndirectFileBlock(SOInode * ip, uint32_t afbn)
     {
         soProbe(302, "%s(%d, ...)\n", __FUNCTION__, afbn);
-        uint32_t diindex = afbn/RPB/RPB;
-        uint32_t db[RPB];
-        uint32_t db2[RPB];
+        uint32_t i2idx = afbn/(RPB*RPB);
+        uint32_t ref1 = afbn/(RPB - (afbn / RPB));
+        uint32_t ref2 = afbn%RPB;
+        uint32_t buf1[RPB];
+        uint32_t buf2[RPB];
         uint32_t blk;
-        if (ip->i2[diindex] == NullReference) {
-            blk = soAllocDataBlock();
-            for (uint32_t i = 0; i < RPB; i++) {
-                db[i] = NullReference;
-                db2[i] = NullReference;
-            }
-            soWriteDataBlock(blk,db);
-            ip->i2[diindex] = blk;
-            
-            
-            //create indirect
-            uint32_t ref = (afbn/RPB)%RPB;
-            soWriteDataBlock(blk,db2);
-            blk = soAllocDataBlock();
-            db2[ref] = blk;
-            ip->blkcnt += 2;
+        
+        for (uint32_t i = 0; i < RPB; i++) {
+            buf1[i] = NullReference;
+            buf2[i] = NullReference;
+        }
 
+        if (ip->i2[i2idx] == NullReference) {
 
-            soReadDataBlock(ip->i2[diindex], &db);
-            ip->blkcnt++;
+            ip->i2[i2idx] = soAllocDataBlock();
+
+            uint32_t tmp = soAllocDataBlock();
+            buf1[ref1]= tmp; 
+            soWriteDataBlock(ip->i2[i2idx],buf1);
+            
+            blk = soAllocDataBlock();
+            buf2[ref2] = blk;
+            soWriteDataBlock(tmp,buf2);
+            ip->blkcnt += 3;
         }
         else {
-            soReadDataBlock(ip->i2[diindex], &db);
-            //create indirect
-            uint32_t ref = (afbn/RPB)%RPB;
-            soWriteDataBlock(blk,db);
-            blk = soAllocDataBlock();
-            db2[ref] = blk;
-            ip->blkcnt += 2;
+            soReadDataBlock(ip->i2[i2idx], buf1);
+            if (buf1[ref1]==NullReference){
+                uint32_t tmp = soAllocDataBlock();
+                buf1[ref1]= tmp; 
+                soWriteDataBlock(ip->i2[i2idx],buf1);
+            
+                blk = soAllocDataBlock();
+                buf2[ref2] = blk;
+                soWriteDataBlock(tmp,buf2);
+                ip->blkcnt += 2;
+            } else{
+                blk = soAllocDataBlock();
+                soReadDataBlock(buf1[ref1], buf2);
+                buf2[ref2]= blk;
+                soWriteDataBlock(buf1[ref1], buf2);
+                ip->blkcnt++;
+            }
         }
         return blk;
-        /* change the following two lines by your code */
     }
 #endif
 };
