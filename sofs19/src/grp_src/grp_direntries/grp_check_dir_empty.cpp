@@ -33,13 +33,13 @@ namespace sofs19
             if(temp != NullReference){
                 soReadFileBlock(ih, i, dir);
 
-                for(uint32_t j = 0; j < DPB; i++){
-                    if(dir[i].name[0] != '\0'){
-                        if(strcmp(dir[i].name, ".")){
+                for(uint32_t j = 0; j < DPB; j++){
+                    if(dir[j].name[0] != '\0'){
+                        if(strcmp(dir[j].name, ".")){
                             if(point){ return false; }
                             point = 1;
                         }
-                        else if (strcmp(dir[i].name, "..")){
+                        else if (strcmp(dir[j].name, "..")){
                             if(pointpoint){ return false; }
                             pointpoint = 1;
                         }
@@ -51,9 +51,7 @@ namespace sofs19
             }
         }
 
-
-        if(point && pointpoint){ return true; }
-        return false;
+        return (point && pointpoint);
     }
 };
 
