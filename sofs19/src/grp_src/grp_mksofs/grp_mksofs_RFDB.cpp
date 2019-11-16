@@ -14,7 +14,7 @@ namespace sofs19
         soProbe(607, "%s(%u, %u, %u)\n", __FUNCTION__, ntotal, itotal, nbref);
 
         /* change the following line by your code */
-        binResetFreeDataBlocks(ntotal, itotal, nbref);
+        //binResetFreeDataBlocks(ntotal, itotal, nbref);
         uint8_t array [BlockSize];
         memset(array, 0, BlockSize);
         uint32_t freeblocks = (itotal/IPB) + nbref + 2;
