@@ -80,9 +80,13 @@ namespace sofs19
         }
         else{
             soReadDataBlock((ip -> i2[afbn/(RPB*RPB)]), blk);
-            temp = blk[afbn/(RPB - ((afbn / (RPB * RPB)) * RPB))];
-            soReadDataBlock(temp, blk);
-            return blk[afbn%RPB];
+            temp = blk[afbn/(RPB - (afbn / RPB))];
+            if (temp == NullReference){
+                return NullReference;
+            } else {
+                soReadDataBlock(temp, blk);
+                return blk[afbn%RPB];
+            }
         }
     }
 

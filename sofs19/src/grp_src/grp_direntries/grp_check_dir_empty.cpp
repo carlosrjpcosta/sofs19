@@ -35,11 +35,11 @@ namespace sofs19
 
                 for(uint32_t j = 0; j < DPB; j++){
                     if(dir[j].name[0] != '\0'){
-                        if(strcmp(dir[j].name, ".")){
+                        if(!strcmp(dir[j].name, ".")){
                             if(point){ return false; }
                             point = 1;
                         }
-                        else if (strcmp(dir[j].name, "..")){
+                        else if (!strcmp(dir[j].name, "..")){
                             if(pointpoint){ return false; }
                             pointpoint = 1;
                         }
