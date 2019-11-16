@@ -15,14 +15,16 @@ namespace sofs19
         soProbe(331, "%s(%d, %u, %p)\n", __FUNCTION__, ih, fbn, buf);
 
         /* change the following line by your code 
-        binReadFileBlock(ih, fbn, buf);     */
+        binReadFileBlock(ih, fbn, buf); */
 
-        if (soGetFileBlock(ih, fbn) == NullReference){
-            uint32_t temp[BlockSize] = {0x00000000};
-            buf = temp;
+        uint32_t dbn= soGetFileBlock(ih,fbn);
+        
+        if (dbn == NullReference){
+            char temp[BlockSize] = {'\0'};
+            buf= &temp;
         }
         else{
-            soReadFileBlock(ih,fbn, buf);
+            soReadDataBlock(dbn, buf);
         }
     }
 };
