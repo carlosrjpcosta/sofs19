@@ -21,10 +21,12 @@ namespace sofs19
 
         /* change the following line by your code */
         //return binGetFileBlock(ih, fbn);
-
+        uint32_t BRB = RPB * RPB;
+        uint32_t doubleIndirectStart = N_INDIRECT * RPB + N_DIRECT;
+        uint32_t doubleIndirectEnd = BRB * N_DOUBLE_INDIRECT + doubleIndirectStart;
         uint32_t res;
 
-        if(fbn < 0){
+        if(fbn < 0 || fbn>= doubleIndirectEnd){
             throw SOException(EINVAL, __FUNCTION__);
         }
 
@@ -32,12 +34,11 @@ namespace sofs19
         if(fbn < N_DIRECT){
             res = ind -> d[fbn];
         }else if(fbn < (N_INDIRECT * RPB + N_DIRECT)){
-            res = grpGetIndirectFileBlock(ind, fbn);
+            res = grpGetIndirectFileBlock(ind, fbn - N_DIRECT);
         }else{
-            res = grpGetDoubleIndirectFileBlock(ind, fbn);
+            res = grpGetDoubleIndirectFileBlock(ind, fbn - doubleIndirectStart);
         }
 
-        soSaveInode(ih);
         return res;
     }
 
@@ -50,20 +51,14 @@ namespace sofs19
         /* change the following two lines by your code */
         //throw SOException(ENOSYS, __FUNCTION__);
 
-        uint32_t res;
-        uint32_t *ref;
         uint32_t blk[RPB];
-        afbn = afbn - N_DIRECT;
 
-        if(ip -> i1[afbn/RPB] == (uint32_t)NullReference){
-            res = NullReference;
-            return res;
+        if(ip -> i1[afbn/RPB] == NullReference){
+            return NullReference;
         }
         else{
             soReadDataBlock((ip -> i1[afbn/RPB]), blk);
-            ref = (uint32_t *) blk;
-            res = ref[afbn%RPB];
-            return res;
+            return blk[afbn%RPB];
         }
     }
 
@@ -77,23 +72,17 @@ namespace sofs19
         /* change the following two lines by your code */
         //throw SOException(ENOSYS, __FUNCTION__);
 
-        uint32_t res;
         uint32_t temp;
-        uint32_t *ref;
         uint32_t blk[RPB];
-        afbn = afbn - N_DIRECT - (N_INDIRECT * RPB);
 
-        if(ip -> i2[afbn/(RPB*RPB)] == (uint32_t)NullReference){
-            res = NullReference;
-            return res;
+        if(ip -> i2[afbn/(RPB*RPB)] == NullReference){
+            return NullReference;
         }
         else{
             soReadDataBlock((ip -> i2[afbn/(RPB*RPB)]), blk);
             temp = blk[afbn/(RPB - ((afbn / (RPB * RPB)) * RPB))];
             soReadDataBlock(temp, blk);
-            ref = (uint32_t *) blk;
-            res = ref[afbn%RPB];
-            return res;
+            return blk[afbn%RPB];
         }
     }
 
