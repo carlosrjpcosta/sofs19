@@ -40,14 +40,18 @@ namespace sofs19
         // {
         //     for(int i = ffbn; i < N_DIRECT;i++)
         //     {
-        //         soWriteDataBlock(ih,i,NullReference);
+        //         data_block = soGetFileBlock(ih,i)
+        //         soWriteDataBlock(ih,data_block,NullReference);
         //     }
         // }
 
         // uint32_t i2 = N_INDIRECT * RPB + N_DIRECT;
         // bool free_in = grpFreeIndirectFileBlocks(inode,N_DIRECT,ffbn);
         // bool free_in2 = grpFreeDoubleIndirectFileBlocks(inode,i2,ffbn);
-        
+
+        // soSaveInode(ih);
+        // soCloseInode(ih);
+
         binFreeFileBlocks(ih, ffbn);
     }
 
@@ -60,12 +64,17 @@ namespace sofs19
 
         // /* change the following line by your code */
 
-        // if (i2 - 1 > ffbn)
+        // if(ffbn < (N_INDIRECT*RPB + N_DIRECT))
         // {
-        //     return true;
-        // }
-        // return false;
-        // throw SOException(ENOSYS, __FUNCTION__); 
+        //     for(int i = 0; i < N_INDIRECT; i++)
+        //     {
+        //         data_block = soGetFileBlock(ip->i1[i],ffbn)
+        //         for(int j = 0; j < RPB; j++)
+        //         {
+
+        //         }
+        //     }
+        // } 
     }
 #endif
 

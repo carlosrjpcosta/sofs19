@@ -23,47 +23,53 @@ namespace sofs19
 
         SOInode* parent = soGetInodePointer(pih);
         SODirEntry dir [DPB];
-        __uint32_t dir_inode = soGetDirEntry(pih,name);
-        
-        if(dir_inode != NullReference)
+        bool is_empty = false;
+        __uint32_t block;
+        // __uint32_t block = (parent->size/sizeof(SODirEntry))/RPB;
+        __uint32_t total_blocks = parent->size / BlockSize;
+        // __uint32_t blck_number = soGetFileBlock(pih,block);
+
+        for(int i = 0; i < total_blocks; i++)
         {
-            throw SOException(EINVAL,__FUNCTION__);
-        }
-
-        __uint32_t block = (parent->size/sizeof(SODirEntry))/RPB;
-        __uint32_t blck_number = soGetFileBlock(pih,block);
-
-        if(blck_number != NullReference)
-        {
-            blck_number = soAllocFileBlock(pih,block);
-            
-            dir[0].in = cin;
-            strcpy(dir[0].name,name);
-            
-            soWriteDataBlock(blck_number, &dir);
-            parent->size = parent->size + sizeof(SODirEntry);
-
-            for(int i = 1; i < DPB; i++)
+            soReadFileBlock (pih, i, dir);
+            for(int j = 0; j < DPB; j++)
             {
-                dir[i].in = NullReference;
-                strcpy(dir[0].name,"\0");
+                if (strcmp(dir[j].name, name)==0){
+                    throw SOException(EINVAL,__FUNCTION__);   
+                }
+                if (dir[j].name[0] == '\0' and is_empty == false){
+                    block = soGetFileBlock(pih,i);
+                    is_empty = true;
+                }
             }
         }
 
-        else
+        if(is_empty == true)
         {
-            soReadFileBlock(pih, blck_number, &dir);
-
-            __uint32_t blck_index = (parent->size/sizeof(SODirEntry)) % RPB;
-            strcpy(dir[blck_index].name,name);
-            dir[blck_index].in = cin;
-
-            soWriteDataBlock(blck_number, &dir);
-            parent->size = parent->size + sizeof(SODirEntry);    
+            soReadFileBlock(pih,block,dir);
+            for(int j = 0; j < DPB ; j++)
+            {
+                if (dir[j].name[0] == '\0'){
+                    strcpy(dir[j].name, name);
+                    dir[j].in = cin;
+                    soWriteFileBlock(pih,block,dir);
+                    soSaveInode(pih);
+                    return;
+                }
+            }
         }
-
+        block = soAllocFileBlock(pih, total_blocks);
+        strcpy(dir[0].name, name);
+        dir[0].in = cin;
+        for(int j = 1; j < DPB; j++)
+        {
+            dir[0].in = NullReference;
+            memset(dir[j].name,'\0',SOFS19_MAX_NAME);
+        }
+        
+        soWriteFileBlock(pih,block,dir);
+        parent->size = parent->size + sizeof(SODirEntry);
         soSaveInode(pih);
-        soCloseInode(pih);
     }
 };
 
