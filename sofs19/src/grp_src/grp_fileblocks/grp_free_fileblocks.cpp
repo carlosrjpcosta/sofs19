@@ -34,25 +34,34 @@ namespace sofs19
         soProbe(303, "%s(%d, %u)\n", __FUNCTION__, ih, ffbn);
 
         // /* change the following line by your code */
-        // SOInode* inode = soGetInodePointer(ih);
+        SOInode* inode = soGetInodePointer(ih);
+        __uint32_t data_block;
 
-        // if (ffbn < N_DIRECT)
-        // {
-        //     for(int i = ffbn; i < N_DIRECT;i++)
-        //     {
-        //         data_block = soGetFileBlock(ih,i)
-        //         soWriteDataBlock(ih,data_block,NullReference);
-        //     }
-        // }
+        if (ffbn < N_DIRECT)
+        {
+            for(__uint32_t i = ffbn; i < N_DIRECT;i++)
+            {
+                inode->d[i] = NullReference;
+                soFreeDataBlock(i);
+            }
+        }
 
-        // uint32_t i2 = N_INDIRECT * RPB + N_DIRECT;
-        // bool free_in = grpFreeIndirectFileBlocks(inode,N_DIRECT,ffbn);
-        // bool free_in2 = grpFreeDoubleIndirectFileBlocks(inode,i2,ffbn);
+        uint32_t i2 = N_INDIRECT * RPB + N_DIRECT;
 
-        // soSaveInode(ih);
-        // soCloseInode(ih);
+        for(int i = 0; i < N_INDIRECT;i++)
+        {
+            bool free_in = grpFreeIndirectFileBlocks(inode,i,ffbn);
+        }
+        
+        for(int i = 0; i < N_DOUBLE_INDIRECT;i++)
+        {
+            bool free_in2 = grpFreeDoubleIndirectFileBlocks(inode,i2,ffbn);
+        }
+        
 
-        binFreeFileBlocks(ih, ffbn);
+        soSaveInode(ih);
+
+        // binFreeFileBlocks(ih, ffbn);
     }
 
     /* ********************************************************* */
@@ -63,18 +72,38 @@ namespace sofs19
         soProbe(303, "%s(..., %u, %u)\n", __FUNCTION__, i1, ffbn);
 
         // /* change the following line by your code */
+        __uint32_t count = 0;
+        bool block_found = false;
+        __uint32_t ref[RPB];
+        __uint32_t blck = N_DIRECT;
 
-        // if(ffbn < (N_INDIRECT*RPB + N_DIRECT))
-        // {
-        //     for(int i = 0; i < N_INDIRECT; i++)
-        //     {
-        //         data_block = soGetFileBlock(ip->i1[i],ffbn)
-        //         for(int j = 0; j < RPB; j++)
-        //         {
+        if(ffbn < N_DIRECT + (i1+1)*RPB)
+        {
+            soReadDataBlock(ip->i1[i1],ref);
+            for(__uint32_t i = 0; i < RPB; i++)
+            {
+                if(ffbn <= blck)
+                {
+                    ref[i] = NullReference;
+                    soFreeDataBlock(blck);
+                    ip->blkcnt--;
+                }
+                if(ref[i] == NullReference)
+                {
+                    count++;
+                }
+                blck++;
+            }
+            soWriteDataBlock(ip->i1[i1],ref);
 
-        //         }
-        //     }
-        // } 
+            if(count == RPB)
+            {
+                soFreeDataBlock(ip->i1[i1]);
+                ip->blkcnt--;
+            }
+        }
+            
+        return false; 
     }
 #endif
 
