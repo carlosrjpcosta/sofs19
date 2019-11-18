@@ -122,7 +122,39 @@ namespace sofs19
         soProbe(303, "%s(..., %u, %u)\n", __FUNCTION__, i2, ffbn);
 
         /* change the following line by your code */
-        // throw SOException(ENOSYS, __FUNCTION__); 
+        // throw SOException(ENOSYS, __FUNCTION__);
+
+        bool allNullRefs= true;
+        uint32_t bf1[RPB];
+        uint32_t bf2[RPB];
+
+        soReadDataBlock(ip->i2[i2], bf1);
+
+        for (uint32_t i = 0; i < RPB; i++){
+            if(allNullRefs && i < ffbn && bf1[i] != NullReference){
+                allNullRefs = false;
+                soReadDataBlock(bf1[i], bf2);
+                for(uint32_t j = 0; j < RPB; j++){
+                    if(bf2[j] != NullReference){
+                        soFreeDataBlock(bf2[j]);
+                        bf2[j] = NullReference;
+                        ip->blkcnt--;
+                    }
+                }
+            } 
+            else if (i >= ffbn) {
+                if(bf1[i]!= NullReference){
+                    soFreeDataBlock(bf1[i]);
+                    bf1[i] = NullReference;
+                    ip->blkcnt --;
+                }
+            }
+
+            soWriteDataBlock(bf1[i], bf2);
+        }
+
+        soWriteDataBlock(ip->i2[i2],bf1);
+        return allNullRefs; 
     }
 #endif
 
