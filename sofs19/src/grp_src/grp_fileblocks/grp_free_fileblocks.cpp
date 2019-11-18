@@ -35,30 +35,52 @@ namespace sofs19
 
         // /* change the following line by your code */
         SOInode* inode = soGetInodePointer(ih);
-        __uint32_t data_block;
+        uint32_t BRB = RPB * RPB;
+        uint32_t doubleIndirectStart = N_INDIRECT * RPB + N_DIRECT;
+        uint32_t doubleIndirectEnd = BRB * N_DOUBLE_INDIRECT + doubleIndirectStart;
 
         if (ffbn < N_DIRECT)
         {
-            for(__uint32_t i = ffbn; i < N_DIRECT;i++)
+            for(; ffbn < N_DIRECT; ffbn++)
             {
-                inode->d[i] = NullReference;
-                soFreeDataBlock(i);
+                if(inode->d[ffbn] != NullReference){
+                    soFreeDataBlock(inode->d[ffbn]);
+                    inode->d[ffbn] = NullReference;
+                    inode->blkcnt --;
+                }
             }
         }
 
-        uint32_t i2 = N_INDIRECT * RPB + N_DIRECT;
+        if (ffbn >= N_DIRECT && ffbn < doubleIndirectStart) {
+            while (ffbn < doubleIndirectStart){
+                uint32_t i1= (ffbn-N_DIRECT) / RPB;
+                if(inode->i1[i1] != NullReference && grpFreeIndirectFileBlocks(inode,i1,(ffbn-N_DIRECT)%RPB)){
+                    soFreeDataBlock(inode->i1[i1]);
+                    inode->i1[i1] = NullReference;
+                    inode->blkcnt --;
+                }
+                if((ffbn-N_INDIRECT)%RPB != 0){
+                    ffbn= N_DIRECT + i1 * RPB;
+                }
+                ffbn+= RPB;
+            }
+        }
 
-        for(int i = 0; i < N_INDIRECT;i++)
-        {
-            bool free_in = grpFreeIndirectFileBlocks(inode,i,ffbn);
+        if (ffbn >= doubleIndirectStart && ffbn < doubleIndirectEnd){
+            while (ffbn < doubleIndirectEnd){
+                uint32_t i2= (ffbn-doubleIndirectStart) / BRB;
+                if(inode->i2[i2] != NullReference && grpFreeDoubleIndirectFileBlocks(inode,i2,(ffbn-doubleIndirectStart)%BRB)){
+                    soFreeDataBlock(inode->i2[i2]);
+                    inode->i2[i2] = NullReference;
+                    inode->blkcnt --;
+                }
+                if((ffbn-doubleIndirectStart)%BRB != 0){
+                    ffbn= doubleIndirectStart + i2 * BRB;
+                }
+                ffbn+= BRB;
+            }
         }
         
-        for(int i = 0; i < N_DOUBLE_INDIRECT;i++)
-        {
-            bool free_in2 = grpFreeDoubleIndirectFileBlocks(inode,i2,ffbn);
-        }
-        
-
         soSaveInode(ih);
 
         // binFreeFileBlocks(ih, ffbn);
@@ -72,38 +94,23 @@ namespace sofs19
         soProbe(303, "%s(..., %u, %u)\n", __FUNCTION__, i1, ffbn);
 
         // /* change the following line by your code */
-        __uint32_t count = 0;
-        bool block_found = false;
-        __uint32_t ref[RPB];
-        __uint32_t blck = N_DIRECT;
+        bool allNullRefs= true;
+        uint32_t buf[RPB];
 
-        if(ffbn < N_DIRECT + (i1+1)*RPB)
-        {
-            soReadDataBlock(ip->i1[i1],ref);
-            for(__uint32_t i = 0; i < RPB; i++)
-            {
-                if(ffbn <= blck)
-                {
-                    ref[i] = NullReference;
-                    soFreeDataBlock(blck);
-                    ip->blkcnt--;
+        soReadDataBlock(ip->i1[i1],buf);
+        for (uint32_t ref=0; ref<RPB; ref++){
+            if(allNullRefs && ref < ffbn && buf[ref] != NullReference){
+                allNullRefs = false;
+            } else if (ref>= ffbn) {
+                if(buf[ref]!= NullReference){
+                    soFreeDataBlock(buf[ref]);
+                    buf[ref] = NullReference;
+                    ip->blkcnt --;
                 }
-                if(ref[i] == NullReference)
-                {
-                    count++;
-                }
-                blck++;
-            }
-            soWriteDataBlock(ip->i1[i1],ref);
-
-            if(count == RPB)
-            {
-                soFreeDataBlock(ip->i1[i1]);
-                ip->blkcnt--;
             }
         }
-            
-        return false; 
+        soWriteDataBlock(ip->i1[i1],buf);
+        return allNullRefs; 
     }
 #endif
 
