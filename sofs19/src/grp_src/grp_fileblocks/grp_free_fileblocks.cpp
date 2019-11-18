@@ -8,6 +8,9 @@
 #include <inttypes.h>
 #include <errno.h>
 #include <assert.h>
+#include <iostream>
+
+using namespace std;
 
 namespace sofs19
 {
@@ -54,7 +57,7 @@ namespace sofs19
         if (ffbn >= N_DIRECT && ffbn < doubleIndirectStart) {
             while (ffbn < doubleIndirectStart){
                 uint32_t i1= (ffbn-N_DIRECT) / RPB;
-                if(inode->i1[i1] != NullReference && grpFreeIndirectFileBlocks(inode,i1,(ffbn-N_DIRECT)%RPB)){
+                if(inode->i1[i1] != NullReference && grpFreeIndirectFileBlocks(inode,inode->i1[i1],(ffbn-N_DIRECT)%RPB)){
                     soFreeDataBlock(inode->i1[i1]);
                     inode->i1[i1] = NullReference;
                     inode->blkcnt --;
@@ -69,7 +72,7 @@ namespace sofs19
         if (ffbn >= doubleIndirectStart && ffbn < doubleIndirectEnd){
             while (ffbn < doubleIndirectEnd){
                 uint32_t i2= (ffbn-doubleIndirectStart) / BRB;
-                if(inode->i2[i2] != NullReference && grpFreeDoubleIndirectFileBlocks(inode,i2,(ffbn-doubleIndirectStart)%BRB)){
+                if(inode->i2[i2] != NullReference && grpFreeDoubleIndirectFileBlocks(inode,inode->i2[i2],(ffbn-doubleIndirectStart)%BRB)){
                     soFreeDataBlock(inode->i2[i2]);
                     inode->i2[i2] = NullReference;
                     inode->blkcnt --;
@@ -83,7 +86,7 @@ namespace sofs19
         
         soSaveInode(ih);
 
-        // binFreeFileBlocks(ih, ffbn);
+        //binFreeFileBlocks(ih, ffbn);
     }
 
     /* ********************************************************* */
@@ -97,7 +100,7 @@ namespace sofs19
         bool allNullRefs= true;
         uint32_t buf[RPB];
 
-        soReadDataBlock(ip->i1[i1],buf);
+        soReadDataBlock(i1,buf);
         for (uint32_t ref=0; ref<RPB; ref++){
             if(allNullRefs && ref < ffbn && buf[ref] != NullReference){
                 allNullRefs = false;
@@ -109,7 +112,7 @@ namespace sofs19
                 }
             }
         }
-        soWriteDataBlock(ip->i1[i1],buf);
+        soWriteDataBlock(i1,buf);
         return allNullRefs; 
     }
 #endif
@@ -125,36 +128,33 @@ namespace sofs19
         // throw SOException(ENOSYS, __FUNCTION__);
 
         bool allNullRefs= true;
-        uint32_t bf1[RPB];
-        uint32_t bf2[RPB];
+        uint32_t buf[RPB];
+        uint32_t i1idx= ffbn/RPB;
 
-        soReadDataBlock(ip->i2[i2], bf1);
-
-        for (uint32_t i = 0; i < RPB; i++){
-            if(allNullRefs && i < ffbn && bf1[i] != NullReference){
+        soReadDataBlock(i2, buf);
+        for (uint32_t ref=0; ref<RPB; ref++){
+            if(allNullRefs && ref < i1idx && buf[ref] != NullReference){
                 allNullRefs = false;
-                soReadDataBlock(bf1[i], bf2);
-                for(uint32_t j = 0; j < RPB; j++){
-                    if(bf2[j] != NullReference){
-                        soFreeDataBlock(bf2[j]);
-                        bf2[j] = NullReference;
-                        ip->blkcnt--;
-                    }
+            } else if (ref== i1idx) {
+                if(buf[ref]!= NullReference){
+                    if (grpFreeIndirectFileBlocks(ip,buf[ref],ffbn % RPB)){
+                        soFreeDataBlock(buf[ref]);
+                        buf[ref] = NullReference;
+                        ip->blkcnt --;
+                    } else {
+                        allNullRefs = false;
+                    }       
                 }
-            } 
-            else if (i >= ffbn) {
-                if(bf1[i]!= NullReference){
-                    soFreeDataBlock(bf1[i]);
-                    bf1[i] = NullReference;
+            } else if (ref > i1idx) {
+                if(buf[ref]!= NullReference && grpFreeIndirectFileBlocks(ip,buf[ref],0)){
+                    soFreeDataBlock(buf[ref]);
+                    buf[ref] = NullReference;
                     ip->blkcnt --;
                 }
             }
-
-            soWriteDataBlock(bf1[i], bf2);
         }
-
-        soWriteDataBlock(ip->i2[i2],bf1);
-        return allNullRefs; 
+        soWriteDataBlock(i2,buf);
+        return allNullRefs;
     }
 #endif
 

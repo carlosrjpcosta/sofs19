@@ -9,6 +9,7 @@
 
 #include <iostream>
 
+
 namespace sofs19
 {
 
@@ -94,8 +95,9 @@ namespace sofs19
     {
         soProbe(302, "%s(%d, ...)\n", __FUNCTION__, afbn);
         uint32_t i2idx = afbn/(RPB*RPB);
-        uint32_t ref1 = afbn/(RPB - (afbn / RPB));
+        uint32_t ref1 = (afbn /RPB) % RPB;
         uint32_t ref2 = afbn%RPB;
+        
         uint32_t buf1[RPB];
         uint32_t buf2[RPB];
         uint32_t blk;
